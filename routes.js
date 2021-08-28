@@ -17,17 +17,49 @@ routes.get('/menu', (req, res) => {
     })
 })
 
+routes.get('/menu-lista', (req, res) =>{
+    req.getConnection( (err, conn) => {
+        if (err) return res.send(err)
+        
+         conn.query(` SELECT prod_menu_id AS ID, prod_menu_nombre AS NOMBRE, 
+                        prod_menu_precio AS PRECIO  
+                        FROM producto_menu`, (err,rows) =>{
+             if (err)return res.send(err) 
+                 
+             res.json(rows)
+
+         })
+    })
+})
+
 
 // =========================================
 // RUTAS PARA CLIENTE
 // =========================================
+// routes.get('/cliente/ventas', (req, res) => {
+//     req.getConnection((err, conn) => {
+//         if (err) return res.send(err)
+
+//         conn.query(`
+//         SELECT 
+//         cliente_id, concat  (cliente_nombre,' - ' ,cliente_apellido) AS 'nombres',  cliente_telefono, cliente_email ,det_orden_cantidad
+//         FROM cliente, detalle_orden
+//         GROUP BY cliente_id
+//          `, (err, rows) => {
+//             if (err) return res.send(err)
+
+//             res.json(rows)
+//         })
+//     })
+// })
+
 routes.get('/cliente', (req, res) => {
     req.getConnection((err, conn) => {
         if (err) return res.send(err)
 
         conn.query(`
-        SELECT cliente_id, concat  (cliente_nombre,' - ' ,cliente_apellido) AS 'nombres',  cliente_telefono, cliente_email ,det_orden_cantidad
-        FROM cliente, detalle_orden;
+        SELECT cliente_id, cliente_cedula, cliente_nombre, cliente_apellido,  cliente_telefono, cliente_email ,cliente_fechanac
+        FROM cliente;
          `, (err, rows) => {
             if (err) return res.send(err)
 
@@ -53,6 +85,47 @@ routes.get('/empleado', (req, res) => {
         })
     })
 })
+routes.get('/empleado/lista', (req, res) => {
+    req.getConnection((err, conn) => {
+        if (err) return res.send(err)
+
+        conn.query(`
+        SELECT 
+        empleado.empl_id AS 'id',
+        empleado.empl_nombre AS 'nombre',
+        empleado.empl_apellidos AS 'apellido',
+        empleado.empl_email AS 'correo',
+        empleado.empl_telefono AS 'telefono',
+        empleado.empl_fechanac AS 'fnacimiento'
+        FROM empleado;
+        `, (err, rows) => {
+            if (err) return res.send(err)
+            res.json(rows)
+        })
+    })
+})
+
+// insertar un Empleado 
+routes.post('/insertar/empleado', (req, res)=>{
+    const{name,namel,dat,tel,email,select}=req.body;
+    req.getConnection((err, conn)=>{
+        if(err) return res.send(err)
+        conn.query(
+        `
+        INSERT INTO empleado(empl_nombre, empl_apellidos,
+        empl_telefono , empl_fechanac, empl_email
+        , empl_tipo_empl_id) 
+        VALUES(?,?,?,?,?,?);
+        `
+        , [name,namel,tel,dat,email,select], (err, rows)=>{
+            if(err) return res.send(err)
+            return res.send('promocion added!')
+        })
+    })
+})
+
+
+
 
 
 
@@ -63,7 +136,7 @@ routes.get('/empleado', (req, res) => {
 
 // interfaz de usuario 
 
-routes.get('/ordenes', (req, res) => {
+routes.get('/ordenes/lista', (req, res) => {
     req.getConnection((err, conn) => {
         if (err) return res.send(err)
 
@@ -233,22 +306,38 @@ routes.get('/promociones-admin', (req, res) => {
 
 
 // insertar una promocion 
-// routes.post('/insertar/promociones-admin', (req, res)=>{
-//     req.getConnection((err, conn)=>{
-//         if(err) return res.send(err)
-//         conn.query(
-//         `
-//         INSERT INTO promocion(prom_code_promo, prom_fecha_inicio, prom_fecha_fin, prom_descuento, 
-//         prom_estado, prom_descripcion) 
-//         VALUES('111122223333','2021-08-12', '2021-08-17', 10, 'Activo','Aplica solo los jueves en el local');
-//         `
-//         , [req.body], (err, rows)=>{
-//             if(err) return res.send(err)
+routes.post('/insertar/promociones-admin', (req, res)=>{
+    const{name, code, dateIn, dateOut, desc,descripcion}=req.body;
+    let estado;
+    const  valestado = () => {
+        function addZero(x,n){
+            while (x.toString().length < n) {
+                x = "0" + x;
+            }
+            return x;
+        }
+        let date =  new Date();
+        let current = addZero(date.getFullYear(),2)+'-'+addZero((date.getMonth()+1),2)+'-'+addZero(date.getDate(),2);
+        return estado=current;
+    }
+    valestado();
+    console.log(estado)
 
-//             res.send('promocion added!')
-//         })
-//     })
-// })
+    req.getConnection((err, conn)=>{
+        if(err) return res.send(err)
+        conn.query(
+        `
+        INSERT INTO promocion(prom_code_promo, prom_fecha_inicio ,
+        prom_fecha_fin , prom_descuento, 
+        prom_estado,prom_descripcion ) 
+        VALUES(?,?,?,?,?,?);
+        `
+        , [code,dateIn,dateOut,desc,estado,descripcion], (err, rows)=>{
+            if(err) return res.send(err)
+            return res.send('promocion added!')
+        })
+    })
+})
 
 // eliminar promocion
 // routes.delete('/eliminarpromo/:id', (req, res)=>{
@@ -267,22 +356,22 @@ routes.get('/promociones-admin', (req, res) => {
 // })
 
 // actualizar promocion
-// routes.put('/Actualizar/promociones-admin/:id', (req, res)=>{
-//     req.getConnection((err, conn)=>{
-//         if(err) return res.send(err)
-//         conn.query(
-//         `
-//         UPDATE promocion SET prom_code_promo = '111122223334', prom_fecha_inicio = '2021-08-17 00:00:00', 
-//         prom_fecha_fin = '2021-09-30 00:00:00', prom_descuento = '20', prom_estado= 'Activo',
-//         prom_descripcion = 'Aplica solo los Viernes' WHERE promocion.prom_id = ?;
-//         `
-//         , [req.body, req.params.id], (err, rows)=>{
-//             if(err) return res.send(err)
+routes.put('/Actualizar/promociones-admin/:id', (req, res)=>{
+    req.getConnection((err, conn)=>{
+        if(err) return res.send(err)
+        conn.query(
+        `
+        UPDATE promocion SET prom_code_promo = '111122223334', prom_fecha_inicio = '2021-08-17 00:00:00', 
+        prom_fecha_fin = '2021-09-30 00:00:00', prom_descuento = '20', prom_estado= 'Activo',
+        prom_descripcion = 'Aplica solo los Viernes' WHERE promocion.prom_id = ?;
+        `
+        , [req.body, req.params.id], (err, rows)=>{
+            if(err) return res.send(err)
 
-//             res.send('book updated!')
-//         })
-//     })
-// })
+            res.send('book updated!')
+        })
+    })
+})
 
 
 // =========================================
@@ -415,6 +504,26 @@ routes.get('/resumentabl/mas_vendido', (req, res) => {
         })
     })
 });
+
+
+// topclientes
+
+routes.get('/ventas/topcliente', (req, res) => {
+    req.getConnection((err, conn) => {
+        if (err) return res.send(err)
+
+        conn.query(`
+        SELECT 
+        cliente_id, concat  (cliente_nombre,' ' ,cliente_apellido) AS 'nombres',  cliente_telefono, cliente_email ,det_orden_cantidad
+        FROM cliente, detalle_orden
+        GROUP BY cliente_id
+         `, (err, rows) => {
+            if (err) return res.send(err)
+
+            res.json(rows)
+        })
+    })
+})
 
 
 
