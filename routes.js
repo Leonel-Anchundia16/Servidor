@@ -340,35 +340,38 @@ routes.post('/insertar/promociones-admin', (req, res)=>{
 })
 
 // eliminar promocion
-// routes.delete('/eliminarpromo/:id', (req, res)=>{
-//     req.getConnection((err, conn)=>{
-//         if(err) return res.send(err)
-//         conn.query(
-//         `
-//         DELETE FROM promocion WHERE prom_id = ?
-//         `
-//         , [req.params.id], (err, rows)=>{
-//             if(err) return res.send(err)
-
-//             res.send('book excluded!')
-//         })
-//     })
-// })
-
-// actualizar promocion
-routes.put('/Actualizar/promociones-admin/:id', (req, res)=>{
+routes.delete('/eliminarpromo/:id', (req, res)=>{
     req.getConnection((err, conn)=>{
         if(err) return res.send(err)
         conn.query(
         `
-        UPDATE promocion SET prom_code_promo = '111122223334', prom_fecha_inicio = '2021-08-17 00:00:00', 
-        prom_fecha_fin = '2021-09-30 00:00:00', prom_descuento = '20', prom_estado= 'Activo',
-        prom_descripcion = 'Aplica solo los Viernes' WHERE promocion.prom_id = ?;
+        DELETE FROM promocion WHERE prom_id = ?
         `
-        , [req.body, req.params.id], (err, rows)=>{
+        , [req.params.id], (err, rows)=>{
             if(err) return res.send(err)
 
-            res.send('book updated!')
+            res.send('Promocion Eliminada!')
+        })
+    })
+})
+
+// actualizar promocion
+routes.put('/Actualizar/promociones-admin/:id', (req, res)=>{
+    const{name, code, dateIn, dateOut, desc,descripcion,id}=req.body;
+    
+
+    req.getConnection((err, conn)=>{
+        if(err) return res.send(err)
+        conn.query(
+        `
+        UPDATE promocion SET prom_code_promo = ?, prom_fecha_inicio = ?, 
+        prom_fecha_fin = ?, prom_descuento = ?,
+        prom_descripcion = ? WHERE promocion.prom_id = ?;
+        `
+        , [code,dateIn,dateOut,desc,descripcion,id], (err, rows)=>{
+            if(err) return res.send(err)
+
+            res.send('promocion actualizada!')
         })
     })
 })
