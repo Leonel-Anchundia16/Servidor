@@ -1,10 +1,11 @@
 const { Router, response } = require('express');
 const config = require('../config');
-const jsonWt = require('jsonwebtoken');
 const router = Router();
+const jsonWt = require('jsonwebtoken');
+const bscrypt = require('bcrypt');
 
 
-router.post('/login', (req, res)=>{
+router.post('/login', async (req, res)=>{
   const { email, password } = req.body;
 
   req.getConnection((err, conn)=>{
@@ -13,8 +14,8 @@ router.post('/login', (req, res)=>{
           cliente_id as id,
           cliente_nombre as user, 
           cliente_password as password
-      FROM cliente WHERE cliente_email = ?`, [email], (err, response)=>{
-          if(response.length === 0 || !(password === response[0].password)){
+      FROM cliente WHERE cliente_email = ?`, [email], async (err, response)=>{
+          if(response.length === 0 || !(await bscrypt.compare(password, response[0].password))){
               res.json({response: false});
           }else{
             const userForToken = {
@@ -31,16 +32,17 @@ router.post('/login', (req, res)=>{
   })
 });
 
-router.post('/signup', (req, res)=>{
+router.post('/signup', async (req, res)=>{
   const { firstName, lastName, email, dateNacm, telefono, password } = req.body;
+  const encripPass = await bscrypt.hash(password, 8);
   
   req.getConnection((err, conn) => {
       if(err) return res.send(err)
 
       conn.query(`SELECT cliente_email FROM cliente WHERE cliente_email = ?`, [email], (err, resp) => {
-          if(resp.length == 0){
+          if(resp.length === 0){
             conn.query(`INSERT INTO cliente(cliente_nombre, cliente_apellido, cliente_fechanac, cliente_telefono, cliente_email, cliente_password) VALUES (?, ?, ?, ?, ?, ?)`,
-            [ firstName, lastName, dateNacm, telefono, email, password ], (err, resp) => {
+            [ firstName, lastName, dateNacm, telefono, email, encripPass ], (err, resp) => {
                 if(err){
                     return res.json({ response: false });
                 }else{
@@ -52,7 +54,6 @@ router.post('/signup', (req, res)=>{
                             const { id, username } = response[0];
 
                             const userForToken = { id, username }
-                            console.log(userForToken)
 
                             const token  = jsonWt.sign(userForToken, config.USER_SECRET)
                             return res.json({ response: true, jwt: token });
@@ -69,7 +70,7 @@ router.post('/signup', (req, res)=>{
   })
 });
 
-router.post('/admin/login', (req, res)=>{
+router.post('/admin/login', async (req, res)=>{
   const { email, password } = req.body;
 
   req.getConnection((err, conn)=>{
@@ -79,16 +80,14 @@ router.post('/admin/login', (req, res)=>{
           empl_nombre as user,
           empl_email as email,
           empl_password as password
-      FROM empleado WHERE empl_email = ?`, [email], (err, response)=>{
+      FROM empleado WHERE empl_email = ?`, [email], async (err, response)=>{
 
-          if(err){
-              console.log("error al traer datos")
-              return res.send(err)}
+          if(err){ return res.send(err) }
 
-          if(response.length === 0 || !(password === response[0].password)){
-              console.log(response)
+          if(response.length === 0 || !(await bscrypt.compare( password, response[0].password ))){
               return res.json({response: false});
           }else{
+              
             const userForToken = {
                 id: response[0].id,
                 username: response[0].user
