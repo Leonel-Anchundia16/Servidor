@@ -1,27 +1,30 @@
-const express = require('express')
-const routes = express.Router()
+const { Router } = require('express');
+const router = Router();
 
+router.get('/', (req, res) => {
+  res.send(`
+  REST API - La Parrilla de Luchín <br/>
+  <br/>
+  <strong>CONTRIBUITORS:</strong><br/>
+  - Andrés Moncayo Zambrano<br/>
+  - Leonel Anchundia Lucas<br/>
+  - Mendoza Pilligua Jonathan<br/>
+  - Espinoza López Eddy<br/>
+  - Delgado Alonso Pablo<br/>
+  <br/>
+  Fecha de Creación: <strong>31 de Agosto del 2021</strong>
+  `);
+})
 
 // =========================================
 // RUTAS PARA MENU
 // =========================================
-routes.get('/menu', (req, res) => {
-    req.getConnection((err, conn) => {
-        if (err) return res.send(err)
-
-        conn.query(`SELECT * FROM producto_menu`, (err, rows) => {
-            if (err) return res.send(err)
-
-            res.json(rows)
-        })
-    })
-})
 
 
 // =========================================
 // RUTAS PARA CLIENTE
 // =========================================
-routes.get('/cliente', (req, res) => {
+router.get('/cliente', (req, res) => {
     req.getConnection((err, conn) => {
         if (err) return res.send(err)
 
@@ -40,7 +43,7 @@ routes.get('/cliente', (req, res) => {
 // =========================================
 // RUTAS PARA EMPLEADO
 // =========================================
-routes.get('/empleado', (req, res) => {
+router.get('/empleado', (req, res) => {
     req.getConnection((err, conn) => {
         if (err) return res.send(err)
 
@@ -63,7 +66,7 @@ routes.get('/empleado', (req, res) => {
 
 // interfaz de usuario 
 
-routes.get('/ordenes', (req, res) => {
+router.get('/ordenes', (req, res) => {
     req.getConnection((err, conn) => {
         if (err) return res.send(err)
 
@@ -79,7 +82,7 @@ routes.get('/ordenes', (req, res) => {
 
 /// INSERTAR UNA ORDEM
 
-// routes.post('/insertar/ordenes', (req, res) => {
+// router.post('/insertar/ordenes', (req, res) => {
 //     req.getConnection((err, conn) => {
 //         if (err) return res.send(err)
 //         conn.query(
@@ -97,7 +100,7 @@ routes.get('/ordenes', (req, res) => {
 
 // ELIMINAR ORDEN
 
-// routes.delete('/eliminar/orden/:id', (req, res)=>{
+// router.delete('/eliminar/orden/:id', (req, res)=>{
 //     req.getConnection((err, conn)=>{
 //         if(err) return res.send(err)
 //          conn.query(
@@ -113,7 +116,7 @@ routes.get('/ordenes', (req, res) => {
 // })
 
 // actualizar ordenes
-// routes.put('/Actualizar/ordenes/:id', (req, res)=>{
+// router.put('/Actualizar/ordenes/:id', (req, res)=>{
 //     req.getConnection((err, conn)=>{
 //         if(err) return res.send(err)
 //         conn.query(
@@ -134,7 +137,7 @@ routes.get('/ordenes', (req, res) => {
 // interfaz de administracion
 
 
-routes.get('/ordenes_pen', (req, res) => {
+router.get('/ordenes_pen', (req, res) => {
     req.getConnection((err, conn) => {
         if (err) return res.send(err)
 
@@ -155,7 +158,7 @@ routes.get('/ordenes_pen', (req, res) => {
     })
 })
 
-routes.get('/ordenes_pen/cantidad', (req, res) => {
+router.get('/ordenes_pen/cantidad', (req, res) => {
     req.getConnection((err, conn) => {
         if (err) return res.send(err)
 
@@ -178,7 +181,7 @@ routes.get('/ordenes_pen/cantidad', (req, res) => {
 // =========================================
 // RUTAS PARA PROMOCIONES
 // =========================================
-routes.get('/promociones', (req, res) => {
+router.get('/promociones', (req, res) => {
     req.getConnection((err, conn) => {
         if (err) return res.send(err)
 
@@ -207,7 +210,7 @@ routes.get('/promociones', (req, res) => {
 
 // PROMOCIONES ADMINISTRACION 
 // Ver promociones desde admin
-routes.get('/promociones-admin', (req, res) => {
+router.get('/promociones-admin', (req, res) => {
     req.getConnection((err, conn) => {
         if (err) return res.send(err)
 
@@ -233,7 +236,7 @@ routes.get('/promociones-admin', (req, res) => {
 
 
 // insertar una promocion 
-// routes.post('/insertar/promociones-admin', (req, res)=>{
+// router.post('/insertar/promociones-admin', (req, res)=>{
 //     req.getConnection((err, conn)=>{
 //         if(err) return res.send(err)
 //         conn.query(
@@ -251,7 +254,7 @@ routes.get('/promociones-admin', (req, res) => {
 // })
 
 // eliminar promocion
-// routes.delete('/eliminarpromo/:id', (req, res)=>{
+// router.delete('/eliminarpromo/:id', (req, res)=>{
 //     req.getConnection((err, conn)=>{
 //         if(err) return res.send(err)
 //         conn.query(
@@ -267,7 +270,7 @@ routes.get('/promociones-admin', (req, res) => {
 // })
 
 // actualizar promocion
-// routes.put('/Actualizar/promociones-admin/:id', (req, res)=>{
+// router.put('/Actualizar/promociones-admin/:id', (req, res)=>{
 //     req.getConnection((err, conn)=>{
 //         if(err) return res.send(err)
 //         conn.query(
@@ -290,7 +293,7 @@ routes.get('/promociones-admin', (req, res) => {
 // =========================================
 
 //consulta de cantidad de clientes
-routes.get('/resumencliente', (req, res) => {
+router.get('/resumencliente', (req, res) => {
     req.getConnection((err, conn) => {
         if (err) return res.send(err)
 
@@ -309,7 +312,7 @@ routes.get('/resumencliente', (req, res) => {
 
 //consulta de cantidad de ordenes con cualquier tipo de estado
 
-routes.get('/resumenpedidos', (req, res) => {
+router.get('/resumenpedidos', (req, res) => {
     req.getConnection((err, conn) => {
         if (err) return res.send(err)
 
@@ -327,7 +330,7 @@ routes.get('/resumenpedidos', (req, res) => {
 });
 
 //consulta de cantidad de pedidos entregados
-routes.get('/resumenpedidosE', (req, res) => {
+router.get('/resumenpedidosE', (req, res) => {
     req.getConnection((err, conn) => {
         if (err) return res.send(err)
 
@@ -346,7 +349,7 @@ routes.get('/resumenpedidosE', (req, res) => {
 });
 
 // //consulta de tabla de resumen de admin
-routes.get('/resumentabl_clientes', (req, res) => {
+router.get('/resumentabl_clientes', (req, res) => {
     req.getConnection((err, conn) => {
         if (err) return res.send(err)
 
@@ -373,7 +376,7 @@ routes.get('/resumentabl_clientes', (req, res) => {
 // =========================================
 
 // precio total de estado entregado
-routes.get('/resumentabl/entregado', (req, res) => {
+router.get('/resumentabl/entregado', (req, res) => {
     req.getConnection((err, conn) => {
         if (err) return res.send(err)
 
@@ -392,7 +395,7 @@ routes.get('/resumentabl/entregado', (req, res) => {
 });
 
 // Produccto mas vendido
-routes.get('/resumentabl/mas_vendido', (req, res) => {
+router.get('/resumentabl/mas_vendido', (req, res) => {
     req.getConnection((err, conn) => {
         if (err) return res.send(err)
 
@@ -423,7 +426,7 @@ routes.get('/resumentabl/mas_vendido', (req, res) => {
 
 // NO ELIMINAR
 
-// routes.post('/', (req, res)=>{
+// router.post('/', (req, res)=>{
 //     req.getConnection((err, conn)=>{
 //         if(err) return res.send(err)
 //         conn.query('INSERT INTO books set ?', [req.body], (err, rows)=>{
@@ -434,7 +437,7 @@ routes.get('/resumentabl/mas_vendido', (req, res) => {
 //     })
 // })
 
-// routes.delete('/:id', (req, res)=>{
+// router.delete('/:id', (req, res)=>{
 //     req.getConnection((err, conn)=>{
 //         if(err) return res.send(err)
 //         conn.query('DELETE FROM books WHERE id = ?', [req.params.id], (err, rows)=>{
@@ -445,7 +448,7 @@ routes.get('/resumentabl/mas_vendido', (req, res) => {
 //     })
 // })
 
-// routes.put('/:id', (req, res)=>{
+// router.put('/:id', (req, res)=>{
 //     req.getConnection((err, conn)=>{
 //         if(err) return res.send(err)
 //         conn.query('UPDATE books set ? WHERE id = ?', [req.body, req.params.id], (err, rows)=>{
@@ -456,4 +459,4 @@ routes.get('/resumentabl/mas_vendido', (req, res) => {
 //     })
 // })
 
-module.exports = routes
+module.exports = router;
