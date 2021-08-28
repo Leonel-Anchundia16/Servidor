@@ -75,12 +75,17 @@ router.post('/admin/login', async (req, res)=>{
 
   req.getConnection((err, conn)=>{
       if(err) return res.send(err)
-      conn.query(`SELECT 
-          empl_id as id,
-          empl_nombre as user,
-          empl_email as email,
-          empl_password as password
-      FROM empleado WHERE empl_email = ?`, [email], async (err, response)=>{
+      conn.query(`
+      SELECT 
+        empl_id as id,
+        empl_nombre as name,
+        empl_apellidos as lastName,
+        empl_email as email,
+        empl_password as password,
+        tipo_empl_nombre as type
+      FROM empleado
+      INNER JOIN tipo_empleado ON tipo_empl_id = empl_tipo_empl_id 
+      WHERE empl_email = ?`, [email], async (err, response)=>{
 
           if(err){ return res.send(err) }
 
@@ -90,11 +95,16 @@ router.post('/admin/login', async (req, res)=>{
               
             const userForToken = {
                 id: response[0].id,
-                username: response[0].user
+                username: response[0].name
             }
             const token  = jsonWt.sign(userForToken, config.ADMIN_SECRET)
 
-            return res.json({response : true , jwt: token });
+            return res.json({
+                response : true , 
+                jwt: token,
+                user: (response[0].name).split(' ')[0]+" "+(response[0].lastName).split(' ')[0],
+                typeUser: response[0].type
+            });
           }
           
       })
