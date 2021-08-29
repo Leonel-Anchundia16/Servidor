@@ -17,9 +17,24 @@ router.get('/', (req, res) => {
 })
 
 // =========================================
-// RUTAS PARA MENU
+// COMENTARIOS DEL USUARIO
 // =========================================
+router.post('/coments', (req, res) => {
+    const { nombres, apellidos, correo, mensaje } = req.body;
 
+    req.getConnection((err, conect) => {
+        if(err) return res.send("Hubo un error inesperado al enviar este mensaje, inténtalo más tarde.");
+        conect.query(`
+        INSERT INTO comentario_user(com_user_fname, com_user_lname, com_user_email, com_asunto)
+        VALUES (?, ?, ?, ?)`, [ nombres, apellidos, correo, mensaje ], (err, resp) => {
+            if(err){
+                console.log(err)
+                return res.send("Tu mensaje no puedo ser enviado correctamente, inténtalo más tarde.");
+            }
+            return res.send("¡Mensaje enviado exitosamente!");
+        })
+    })
+})
 
 // =========================================
 // RUTAS PARA CLIENTE

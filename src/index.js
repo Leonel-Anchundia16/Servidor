@@ -12,8 +12,8 @@ const authRoute = require('./routes/auth.routes');
 const menuProductosRoute = require('./routes/menuprod.routes');
 // const clientesRoute = require('./routes/clientes.routes');
 // const empleadosRoute = require('./routes/empleados.routes');
-// const ordenesRoute = require('./routes/ordenes.routes');
-// const promocionesRoute = require('./routes/promociones.routes');
+const ordenesRoute = require('./routes/ordenes.routes');
+const promocionesRoute = require('./routes/promociones.routes');
 // const ventasRoute = require('./routes/ventas.routes');
 
 
@@ -29,8 +29,8 @@ app.use('/api/auth', authRoute);
 app.use('/api/menu', menuProductosRoute);
 // app.use('/api/clientes', clientesRoute);
 // app.use('/api/empleados', empleadosRoute);
-// app.use('/api/ordenes', ordenesRoute);
-// app.use('/api/promociones', promocionesRoute);
+app.use('/api/ordenes', ordenesRoute);
+app.use('/api/promociones', promocionesRoute);
 // app.use('/api/ventas', ventasRoute);
 
 

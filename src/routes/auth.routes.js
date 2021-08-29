@@ -11,10 +11,10 @@ router.post('/login', async (req, res)=>{
   req.getConnection((err, conn)=>{
       if(err) return res.send(err)
       conn.query(`SELECT
-          cliente_id as id,
-          cliente_nombre as user, 
-          cliente_password as password
-      FROM cliente WHERE cliente_email = ?`, [email], async (err, response)=>{
+          usu_id as id,
+          usu_nombre as user, 
+          usu_password as password
+      FROM usuario WHERE usu_email = ?`, [email], async (err, response)=>{
           if(response.length === 0 || !(await bscrypt.compare(password, response[0].password))){
               res.json({response: false});
           }else{
@@ -39,14 +39,14 @@ router.post('/signup', async (req, res)=>{
   req.getConnection((err, conn) => {
       if(err) return res.send(err)
 
-      conn.query(`SELECT cliente_email FROM cliente WHERE cliente_email = ?`, [email], (err, resp) => {
+      conn.query(`SELECT usu_email FROM usuario WHERE usu_email = ?`, [email], (err, resp) => {
           if(resp.length === 0){
-            conn.query(`INSERT INTO cliente(cliente_nombre, cliente_apellido, cliente_fechanac, cliente_telefono, cliente_email, cliente_password) VALUES (?, ?, ?, ?, ?, ?)`,
+            conn.query(`INSERT INTO usuario(usu_nombre, usu_apellido, usu_fechanac, usu_telefono, usu_email, usu_password) VALUES (?, ?, ?, ?, ?, ?)`,
             [ firstName, lastName, dateNacm, telefono, email, encripPass ], (err, resp) => {
                 if(err){
                     return res.json({ response: false });
                 }else{
-                    conn.query('SELECT cliente_id as id, cliente_nombre as username FROM cliente WHERE cliente_email = ?', [email], (err, response) => {
+                    conn.query('SELECT usu_id as id, usu_nombre as username FROM usuario WHERE usu_email = ?', [email], (err, response) => {
                         if(err){
                             return res.send(err)
                         }
