@@ -25,4 +25,22 @@ router.get('/', (req, res) => {
 })
 
 
+
+// administracion
+router.get('/menulista', (req, res) =>{
+  req.getConnection( (err, conn) => {
+      if (err) return res.send(err)
+      
+       conn.query(` SELECT prod_menu_id AS ID, prod_menu_nombre AS NOMBRE, 
+                      prod_menu_precio AS PRECIO  
+                      FROM producto_menu`, (err,rows) =>{
+           if (err)return res.send(err) 
+               
+           res.json(rows)
+
+       })
+  })
+})
+
+
 module.exports = router;

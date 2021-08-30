@@ -1,79 +1,33 @@
 ###
-GET http://localhost:9000/api/menu HTTP/1.1
+GET http://localhost:9000/api/menu/menulista HTTP/1.1
 
 ###
-GET http://localhost:9000/api/auth/view HTTP/1.1
-
-###
-POST http://localhost:9000/api/ordenes/new=orden HTTP/1.1
+POST http://localhost:9000/api/insertar/empleado HTTP/1.1
 Content-Type: application/json
-# Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJVc2VyIiwiaWF0IjoxNjMwMDk2OTc4fQ.mf40T4FIFbfhV0Sf2-_5q2Dqhcntvr1uq5igeIFIcLA
 
 {
-    "products": [
-        {
-            "id": 2,
-            "imageURL": null,
-            "inforAdd": "Sin sorbete por favor",
-            "price": 1.5,
-            "quantity": 1,
-            "title": "Jugo Naranjilla (Frozen)"
-        },
-        {
-            "id": 5,
-            "imageURL": null,
-            "inforAdd": "Todo belen",
-            "price": 2.25,
-            "inforAdd": "Todo belen",
-            "quantity": 3,
-            "title": "Jugo Naranjilla (Frozen)"
-        }
-    ],
-    "precios":{
-        "totalDesc": 0,
-        "delivery": 3,
-        "subtotales": 10.5,
-        "total": 13.5
-    },
-    "dataCliente": {
-        "firstName": "Armando una orden",
-        "lastName": "Lucas",
-        "telefono": "0999999999",
-        "direccion": "Casa de la prima de eddy 2",
-        "email": "armando@orden.com",
-        "textarea": "Preguntale a Eddy :v"
-    }
+    "name": "Luis",
+    "namel": "Posligua",
+    "dat": "2021-08-31",
+    "select": 1,
+    "tel":"0987654321",
+    "email":"luis@gmail.com"
+    
 }
 
 ###
-POST http://localhost:9000/api/coments HTTP/1.1
-Content-Type: application/json
-
-{
-    "nombres": "shirley",
-    "apellidos": "Lino",
-    "correo": "shirley25@gmail.com",
-    "mensaj": "Eres el mejor... sigue asi campeón"
-}
+DELETE http://localhost:9000/api/eliminarpromo/10 HTTP/1.1
 
 ###
-POST http://localhost:9000/api/promociones/validate=cDE HTTP/1.1
+PUT http://localhost:9000/api/Actualizar/promociones-admin/11 HTTP/1.1
 Content-Type: application/json
 
 {
-    "code": 123412341234,
-    "prodinBolsa": [
-        {"id":6 },
-        {"id":3 },
-        {"id":1 }
-    ]
-}
-
-###
-POST http://localhost:9000/api/auth/login HTTP/1.1
-Content-Type: application/json
-
-{
-    "email": "armandounporro@hotmail.com",
-    "password": "L12345678"
+    "code":"135020944911",
+    "dateIn":"2021-09-01",
+    "dateOut":"2021-09-05",
+    "desc":"10",
+    "descripcion":"Hola es la primera prueba",
+    "id":"11"
+    
 }
