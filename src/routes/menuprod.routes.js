@@ -24,5 +24,23 @@ router.get('/', (req, res) => {
   })
 })
 
+//insertar producto
+router.post('/', (req, res)=>{
+  const{ selectCat, selectSubcat, nameProduct, descriProduct, priceProduct, imgProduct}=req.body;
+  req.getConnection((err, conn)=>{
+      if(err) return res.send(err)
+      conn.query(
+          `
+          INSERT INTO producto_menu(prod_menu_cat_id, prod_menu_subcat_id, prod_menu_nombre,
+               prod_menu_descripcion, prod_menu_precio, prod_menu_image)
+               VALUES(?,?,?,?,?,?);
+          `,[ selectCat, selectSubcat, nameProduct, descriProduct, priceProduct, imgProduct], (err, rows)=>{
+              if(err) return res.send(err)
+              return res.send('producto agregado con exito :)')
+          }
+      )
+  })
+})
+
 
 module.exports = router;
