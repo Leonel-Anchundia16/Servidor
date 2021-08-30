@@ -51,7 +51,7 @@ router.post('/validate=cDE', (req, res) => {
 // ===========================
 
 // Ver promociones desde admin
-routes.get('/promociones-admin', (req, res) => {
+router.get('/promociones-admin', (req, res) => {
   req.getConnection((err, conn) => {
       if (err) return res.send(err)
 
@@ -78,7 +78,7 @@ routes.get('/promociones-admin', (req, res) => {
 
 
 // insertar una promocion 
-routes.post('/insertar/promociones-admin', (req, res)=>{
+router.post('/insertar/promociones-admin', (req, res)=>{
   const{name, code, dateIn, dateOut, desc,descripcion}=req.body;
   let estado;
   const  valestado = () => {
@@ -113,7 +113,7 @@ routes.post('/insertar/promociones-admin', (req, res)=>{
 
 
 // eliminar promocion
-routes.delete('/eliminarpromo/:id', (req, res)=>{
+router.delete('/eliminarpromo/:id', (req, res)=>{
   req.getConnection((err, conn)=>{
       if(err) return res.send(err)
       conn.query(
@@ -130,7 +130,7 @@ routes.delete('/eliminarpromo/:id', (req, res)=>{
 
 
 // actualizar promocion
-routes.put('/Actualizar/promociones-admin/:id', (req, res)=>{
+router.put('/Actualizar/promociones-admin/:id', (req, res)=>{
   const{name, code, dateIn, dateOut, desc,descripcion,id}=req.body;
   
 

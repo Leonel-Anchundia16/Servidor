@@ -2,7 +2,7 @@ const { Router } = require('express');
 const router = Router();
 
 
-routes.get('/empleado', (req, res) => {
+router.get('/empleado', (req, res) => {
     req.getConnection((err, conn) => {
         if (err) return res.send(err)
 
@@ -17,7 +17,7 @@ routes.get('/empleado', (req, res) => {
 })
 
 
-routes.get('/empleado/lista', (req, res) => {
+router.get('/empleado/lista', (req, res) => {
     req.getConnection((err, conn) => {
         if (err) return res.send(err)
 
@@ -38,7 +38,7 @@ routes.get('/empleado/lista', (req, res) => {
 })
 
 // insertar un Empleado 
-routes.post('/insertar/empleado', (req, res)=>{
+router.post('/insertar/empleado', (req, res)=>{
     const{name,namel,dat,tel,email,select}=req.body;
     req.getConnection((err, conn)=>{
         if(err) return res.send(err)

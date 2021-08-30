@@ -3,7 +3,7 @@ const router = Router();
 
 
 //consulta de cantidad de clientes
-routes.get('/resumencliente', (req, res) => {
+router.get('/resumencliente', (req, res) => {
     req.getConnection((err, conn) => {
         if (err) return res.send(err)
 
@@ -22,7 +22,7 @@ routes.get('/resumencliente', (req, res) => {
 
 //consulta de cantidad de ordenes con cualquier tipo de estado
 
-routes.get('/resumenpedidos', (req, res) => {
+router.get('/resumenpedidos', (req, res) => {
     req.getConnection((err, conn) => {
         if (err) return res.send(err)
 
@@ -40,7 +40,7 @@ routes.get('/resumenpedidos', (req, res) => {
 });
 
 //consulta de cantidad de pedidos entregados
-routes.get('/resumenpedidosE', (req, res) => {
+router.get('/resumenpedidosE', (req, res) => {
     req.getConnection((err, conn) => {
         if (err) return res.send(err)
 
@@ -59,7 +59,7 @@ routes.get('/resumenpedidosE', (req, res) => {
 });
 
 // //consulta de tabla de resumen de admin
-routes.get('/resumentabl_clientes', (req, res) => {
+router.get('/resumentabl_clientes', (req, res) => {
     req.getConnection((err, conn) => {
         if (err) return res.send(err)
 
@@ -83,7 +83,7 @@ routes.get('/resumentabl_clientes', (req, res) => {
 
 
 
-routes.get('/ordenes_pen', (req, res) => {
+router.get('/ordenes_pen', (req, res) => {
     req.getConnection((err, conn) => {
         if (err) return res.send(err)
 
@@ -104,7 +104,7 @@ routes.get('/ordenes_pen', (req, res) => {
     })
 })
 
-routes.get('/ordenes_pen/cantidad', (req, res) => {
+router.get('/ordenes_pen/cantidad', (req, res) => {
     req.getConnection((err, conn) => {
         if (err) return res.send(err)
 

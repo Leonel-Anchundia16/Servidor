@@ -3,7 +3,7 @@ const router = Router();
 
 
 // precio total de estado entregado
-routes.get('/resumentabl/entregado', (req, res) => {
+router.get('/resumentabl/entregado', (req, res) => {
     req.getConnection((err, conn) => {
         if (err) return res.send(err)
 
@@ -22,7 +22,7 @@ routes.get('/resumentabl/entregado', (req, res) => {
 });
 
 // Produccto mas vendido
-routes.get('/resumentabl/mas_vendido', (req, res) => {
+router.get('/resumentabl/mas_vendido', (req, res) => {
     req.getConnection((err, conn) => {
         if (err) return res.send(err)
 
@@ -49,7 +49,7 @@ routes.get('/resumentabl/mas_vendido', (req, res) => {
 
 // topclientes
 
-routes.get('/ventas/topcliente', (req, res) => {
+router.get('/ventas/topcliente', (req, res) => {
     req.getConnection((err, conn) => {
         if (err) return res.send(err)
 
