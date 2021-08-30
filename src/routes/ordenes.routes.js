@@ -58,7 +58,7 @@ const addOrden = ( clienteData, products, precios, credentials ) => {
 router.post('/new=orden', (req, res) => {
   const { products, precios, dataCliente } = req.body;
   const { firstName, lastName, email, telefono, direccion, textarea } = dataCliente;
-  const error = { state: false, send: "Ocurrió un error inesperado al realizar tu transacción, inténtalo de nuevo.", statusText: 401 };
+  const error = { state: false, send: "Ocurrió un error inesperado al realizar tu transacción, inténtalo de nuevo." };
   
   req.getConnection((err, connect) => {
     if (err) { return res.json(error) }

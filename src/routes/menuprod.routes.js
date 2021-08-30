@@ -15,7 +15,7 @@ router.get('/', (req, res) => {
       prod_menu_descripcion as descripcion,
       prod_menu_precio as price,
       prod_menu_image as imageURL
-    FROM producto_menu`, (err, rows) => {
+    FROM producto_menu ORDER BY title`, (err, rows) => {
 
       if (err) return res.send(errcs)
 
