@@ -10,6 +10,7 @@ const app = express()
 const routes = require('./routes');
 const authRoute = require('./routes/auth.routes');
 const menuProductosRoute = require('./routes/menuprod.routes');
+const clienteadminRoute = require('./routes/clientes.routes');
 
 
 // middlewares -------------------------------------
@@ -22,6 +23,8 @@ app.use(cors());
 app.use('/api/', routes);
 app.use('/api/auth', authRoute);
 app.use('/api/menu', menuProductosRoute);
+app.use('/api/clienteadmin', clienteadminRoute);
+app.use('/api/insertar/product', menuProductosRoute);
 
 
 
