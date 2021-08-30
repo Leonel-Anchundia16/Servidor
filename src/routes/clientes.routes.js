@@ -1,19 +1,23 @@
 const { Router } = require('express');
 const router = Router();
 
+// =========================================
+// RUTAS PARA CLIENTE
+// =========================================
 router.get('/', (req, res) => {
-  res.send(`
-  REST API - La Parrilla de Luchín <br/>
-  <br/>
-  <strong>CONTRIBUITORS:</strong><br/>
-  - Andrés Moncayo Zambrano<br/>
-  - Leonel Anchundia Lucas<br/>
-  - Mendoza Pilligua Jonathan<br/>
-  - Espinoza López Eddy<br/>
-  - Delgado Alonso Pablo<br/>
-  <br/>
-  Fecha de Creación: <strong>31 de Agosto del 2021</strong>
-  `);
+    req.getConnection((err, conn) => {
+        if (err) return res.send(err)
+
+        conn.query(`
+        SELECT 
+        cliente_id, concat  (cliente_nombre,'  ' ,cliente_apellido) AS 'nombres',  cliente_telefono, cliente_email, cliente_cedula, cliente_fechanac
+        FROM cliente
+         `, (err, rows) => {
+            if (err) return res.send(err)
+
+            res.json(rows)
+        })
+    })
 })
 
 module.exports = router;
