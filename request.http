@@ -1,33 +1,30 @@
 ###
-GET http://localhost:9000/api/menu/menulista HTTP/1.1
+GET http://localhost:9000/api/empleados/empleado/lista HTTP/1.1
 
 ###
-POST http://localhost:9000/api/insertar/empleado HTTP/1.1
+POST http://localhost:9000/api/promociones/insertar/promoproduct HTTP/1.1
 Content-Type: application/json
 
 {
-    "name": "Luis",
-    "namel": "Posligua",
-    "dat": "2021-08-31",
-    "select": 1,
-    "tel":"0987654321",
-    "email":"luis@gmail.com"
+    "select":"1",
+    "select1":"19"
     
 }
 
 ###
-DELETE http://localhost:9000/api/eliminarpromo/10 HTTP/1.1
+DELETE http://localhost:9000/api/empleados/eliminaremp/5 HTTP/1.1
 
 ###
-PUT http://localhost:9000/api/Actualizar/promociones-admin/11 HTTP/1.1
+PUT http://localhost:9000/api/empleados/actualizar/empleado-admin/3 HTTP/1.1
 Content-Type: application/json
 
 {
-    "code":"135020944911",
-    "dateIn":"2021-09-01",
-    "dateOut":"2021-09-05",
-    "desc":"10",
-    "descripcion":"Hola es la primera prueba",
-    "id":"11"
+    "name": "Leonel",
+    "namel": "Anchundia",
+    "dat": "2000-08-16",
+    "tel": "0987654321",
+    "email": "leo@gmail.com",
+    "select": "2",
+    "id":"3"
     
 }

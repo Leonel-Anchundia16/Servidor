@@ -121,6 +121,22 @@ router.get('/ordenes_pen/cantidad', (req, res) => {
         })
     })
 })
+router.get('/ordenes/cantidad', (req, res) => {
+    req.getConnection((err, conn) => {
+        if (err) return res.send(err)
+
+        conn.query(
+        `
+        SELECT
+			COUNT(orden.orden_id) as total_orden
+        from orden
+        `, (err, rows) => {
+            if (err) return res.send(err)
+
+            res.json(rows)
+        })
+    })
+})
 
 
 
