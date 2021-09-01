@@ -91,4 +91,84 @@ router.post('/new=orden', (req, res) => {
 })
 
 
+//VISTA ORDENES - lista de ordenes
+router.get('/getOrders', (req, res)=>{
+  req.getConnection((err, connect) => {
+    if(err){throw err}
+
+    connect.query(`SELECT
+      orden_id as id,
+      COUNT(det_orden_orden_id) as cant, 
+      CONCAT(cliente_nombre," ",cliente_apellido) as cliente,
+      cliente_telefono as telefono, 
+      orden_fechahora as datetime, 
+      orden_total_orden as total, 
+      orden_estado_order as estado 
+    FROM orden 
+    INNER JOIN detalle_orden ON det_orden_orden_id = orden_id 
+    INNER JOIN cliente ON cliente_id = orden_cliente_id GROUP BY datetime DESC`,  (err, resp) => {
+      if(err){return res.send("Error 401")}
+      
+      return res.json(resp);
+    })
+  })
+})
+
+
+//VISTA ORDENES - MOSTRAR DETALLES DE ORDENES
+router.put("/view/:id", (req, res) => {
+  const {id} = req.params;
+  
+  req.getConnection((err, connect) => {
+    if(err){throw err};
+
+    connect.query(`SELECT
+      CONCAT(cliente_nombre,' ',cliente_apellido) as nombres,
+      cliente_email as correo,
+      cliente_telefono as telefono,
+      orden_direccion_ubic as direccion,
+      orden_direc_inf_adicional as infor,
+      orden_subtotal as subtotales,
+      orden_price_transporte as transporte,
+      orden_total_orden as total
+    FROM orden
+    INNER JOIN cliente ON cliente_id = orden_cliente_id
+    WHERE orden_id = ?`, [id], (err, resp) => {
+      if(err){throw err};
+
+      const dataCliente = {
+        nombres: resp[0].nombres,
+        correo: resp[0].correo,
+        telefono: resp[0].telefono, 
+        direccion: resp[0].direccion,
+        descDirecc: resp[0].infor,
+      };
+
+      const totales = {
+        subtotales: resp[0].subtotales,
+        transporte: resp[0].transporte,
+        totales: resp[0].total
+      }
+
+      connect.query(`SELECT
+      prod_menu_nombre as producto,
+        det_orden_infor_adic as adicion,
+        det_orden_cantidad as cantidad,
+        prod_menu_precio as precio,
+        det_orden_precio_total as subtotal
+      FROM detalle_orden
+      INNER JOIN producto_menu ON prod_menu_id = det_orden_prod_menu_id
+      INNER JOIN orden ON orden_id = det_orden_orden_id
+      WHERE orden_id = ?`, [id], (err, resp) => {
+        if(err){throw err}
+
+        const detalles = resp.map(row => {return row});
+        
+        return res.json( {cliente: dataCliente, totales, productos: detalles} )
+      })
+    })
+  })
+})
+
+
 module.exports = router;
