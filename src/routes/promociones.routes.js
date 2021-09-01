@@ -142,18 +142,34 @@ router.delete('/dltpromo/:id',(req,res )=>{
 // })
 
 
+// insertar una promocion 
 router.post('/insertar/promociones-admin', (req, res)=>{
-  const{product, code, dateIn, dateOut, desc,descripcion}=req.body;
+  const{name, code, dateIn, dateOut, desc,descripcion}=req.body;
+  let estado;
+  const  valestado = () => {
+      function addZero(x,n){
+          while (x.toString().length < n) {
+              x = "0" + x;
+          }
+          return x;
+      }
+      let date =  new Date();
+      let current = addZero(date.getFullYear(),2)+'-'+addZero((date.getMonth()+1),2)+'-'+addZero(date.getDate(),2);
+      return estado=current;
+  }
+  valestado();
+  console.log(estado)
+
   req.getConnection((err, conn)=>{
       if(err) return res.send(err)
       conn.query(
       `
-      INSERT INTO promocion(prom_code_promo, prom_fecha_inicio ,
-      prom_fecha_fin , prom_descuento, 
-      prom_estado,prom_descripcion ) 
-      VALUES(?,?,?,?,?,?);
+        INSERT INTO promocion(prom_code_promo, prom_fecha_inicio ,
+        prom_fecha_fin , prom_descuento, 
+        prom_estado,prom_descripcion ) 
+        VALUES(?,?,?,?,?,?);
       `
-      , [code,dateIn,dateOut,desc,descripcion], (err, rows)=>{
+      , [code,dateIn,dateOut,desc,estado,descripcion], (err, rows)=>{
           if(err) return res.send(err)
           return res.send('promocion added!')
       })
