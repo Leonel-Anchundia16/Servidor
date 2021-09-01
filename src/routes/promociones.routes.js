@@ -58,6 +58,7 @@ router.get('/promociones-admin', (req, res) => {
       conn.query(
       `
       SELECT
+          prom_id,
           prod_menu_nombre, 
           prom_descuento, 
           prom_code_promo, 
@@ -75,6 +76,70 @@ router.get('/promociones-admin', (req, res) => {
   })
 })
 
+router.delete('/dltpromo/:id',(req,res )=>{
+  const{id}=req.params
+  req.getConnection((err,conn)=>{
+    if(err) return res.send(err)
+      conn.query(
+        `
+        SELECT promo_pd_id  FROM promocion_producto WHERE promo_pd_prom_id = ?
+        `
+        ,[id], (err, rows)=>{
+          if(err) return res.send(err)
+          conn.query(
+            'DELETE FROM promocion_producto WHERE promo_pd_id = ?',[rows[0].promo_pd_id],(err,resp)=>{
+                if(err) return res.send(err)
+      
+                conn.query(
+                  'DELETE FROM promocion WHERE prom_id = ?',[id],(err,resp)=>{
+                    if(err) return res.send(err)
+                    res.send('enviado')
+                  }
+                )
+            }
+          )
+        }
+      )
+   } 
+  )
+})
+
+
+// insertar una promocion 
+// router.post('/insertar/promociones-admin', (req, res)=>{
+//   const{product, code, dateIn, dateOut, desc,descripcion}=req.body;
+//   req.getConnection((err, conn)=>{
+//       if(err) return res.send(err)
+//       conn.query(
+//       `
+//       INSERT INTO promocion(prom_code_promo, prom_fecha_inicio ,
+//       prom_fecha_fin , prom_descuento, 
+//       prom_estado,prom_descripcion ) 
+//       VALUES(?,?,?,?,?,?);
+//       `
+//       , [code,dateIn,dateOut,desc,descripcion], (err, rows)=>{
+//           if(err) return res.send(err)
+//           conn.query(
+//             `
+//             SELECT prom_id FROM promocion WHERE prom_code = ?
+//             `
+//             ,(err,resp)=>{
+//               if(err) return res.send(err)
+//               conn.query(
+//                 `
+//                 INSERT promocion_product(prm_pd_proo_id, prm_pd_product_id) VALUES (prom_id, prod_id)
+//                 `
+//                 ,(err,resp)=>{
+//                   if(err) return res.send(err)
+//                   res.send('Agregada')
+//                 }
+//               )  
+
+//             }
+//           )
+//       })
+//   })
+// })
 
 
 // insertar una promocion 
@@ -99,10 +164,10 @@ router.post('/insertar/promociones-admin', (req, res)=>{
       if(err) return res.send(err)
       conn.query(
       `
-      INSERT INTO promocion(prom_code_promo, prom_fecha_inicio ,
-      prom_fecha_fin , prom_descuento, 
-      prom_estado,prom_descripcion ) 
-      VALUES(?,?,?,?,?,?);
+        INSERT INTO promocion(prom_code_promo, prom_fecha_inicio ,
+        prom_fecha_fin , prom_descuento, 
+        prom_estado,prom_descripcion ) 
+        VALUES(?,?,?,?,?,?);
       `
       , [code,dateIn,dateOut,desc,estado,descripcion], (err, rows)=>{
           if(err) return res.send(err)
@@ -130,7 +195,7 @@ router.delete('/eliminarpromo/:id', (req, res)=>{
 
 
 // actualizar promocion
-router.put('/Actualizar/promociones-admin/:id', (req, res)=>{
+router.put('/actualizar/promociones-admin/:id', (req, res)=>{
   const{name, code, dateIn, dateOut, desc,descripcion,id}=req.body;
   
 
@@ -151,5 +216,23 @@ router.put('/Actualizar/promociones-admin/:id', (req, res)=>{
 })
 
 
+
+// PARA SELECCIONAR UN PRODUCTO PARA LA PROMO
+
+router.get('/productos', (req, res) => {
+  req.getConnection((err, conn) => {
+      if (err) return res.send(err)
+
+      conn.query(
+      `
+      SELECT  prod_menu_id,prod_menu_nombre
+      FROM  producto_menu;
+      `, (err, rows) => {
+          if (err) return res.send(err)
+
+          res.json(rows)
+      })
+  })
+})
 
 module.exports = router;
