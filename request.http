@@ -1,13 +1,18 @@
 ###
 PUT http://localhost:9000/api/ordenes/view/76 HTTP/1.1
 ###
-GET http://localhost:9000/api/ordenes/getOrders HTTP/1.1
-# Content-Type: application/json
+POST http://localhost:9000/api/promociones/add-promo HTTP/1.1
+Content-Type: application/json
 
-# {
-#     "id": 18,
-#     "total": 7.5 
-# }
+{
+    "prod_menu": 1,
+    "code": "HOLAMUNDO111",
+    "dateIn": "2021-09-05",
+    "dateOut": "2021-09-08",
+    "desc": 15,
+    "descripcion": "Promocíon lista",
+    "image_prom": null
+}
 
 
 ###

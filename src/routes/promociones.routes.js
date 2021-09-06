@@ -9,7 +9,7 @@ router.post('/validate=cDE', (req, res) => {
   const { code, prodinBolsa } = req.body;
 
   req.getConnection((err, conect) => {
-    if(err){return res.json({state: false, alert: "Ocurrió un error inesperado, lo sentimos."})}
+    if (err) { return res.json({ state: false, alert: "Ocurrió un error inesperado, lo sentimos." }) }
 
     conect.query(`
     SELECT
@@ -17,24 +17,24 @@ router.post('/validate=cDE', (req, res) => {
       promo_pd_prod_menu_id as id_producto
     FROM promocion
     INNER JOIN promocion_producto ON promo_pd_prom_id = prom_id
-    WHERE prom_code_promo = ? AND prom_estado = "Activo"`, [ code ], (error, resp) => {
+    WHERE prom_code_promo = ? AND prom_estado = "Activo"`, [code], (error, resp) => {
 
-      if(error){return res.json({state: false, alert: "Ocurrió un error inesperado, lo sentimos."})}
+      if (error) { return res.json({ state: false, alert: "Ocurrió un error inesperado, lo sentimos." }) }
 
-      if(resp.length === 0){
-        return res.json({state: false, alert: "El cupón que ingresaste no es válido o caduco."});
-      }else{
+      if (resp.length === 0) {
+        return res.json({ state: false, alert: "El cupón que ingresaste no es válido o caduco." });
+      } else {
         let productosDesc = [];
 
         resp.map(row => {
           prodinBolsa.find(product => product.id === row.id_producto ? productosDesc.push(product) : null);
         })
 
-        if(productosDesc.length === 0){
-          return res.json({state: false, alert: "No contienes ningún producto en tu bolsa que aplique este cupón."})
-        }else{
+        if (productosDesc.length === 0) {
+          return res.json({ state: false, alert: "No contienes ningún producto en tu bolsa que aplique este cupón." })
+        } else {
           return res.json({
-            state: true, 
+            state: true,
             alert: "Cupón canjeado satisfactoriamente.",
             productAplica: productosDesc,
             desc: resp[0].descuento
@@ -53,9 +53,9 @@ router.post('/validate=cDE', (req, res) => {
 // Ver promociones desde admin
 router.get('/promociones-admin', (req, res) => {
   req.getConnection((err, conn) => {
-      if (err) return res.send(err)
+    if (err) return res.send(err)
 
-      conn.query(
+    conn.query(
       `
       SELECT
           prom_id,
@@ -69,38 +69,38 @@ router.get('/promociones-admin', (req, res) => {
       INNER JOIN promocion_producto ON producto_menu.prod_menu_id = promocion_producto.promo_pd_prod_menu_id
       INNER JOIN promocion ON promocion_producto.promo_pd_prom_id = promocion.prom_id;
       `, (err, rows) => {
-          if (err) return res.send(err)
+      if (err) return res.send(err)
 
-          res.json(rows)
-      })
+      res.json(rows)
+    })
   })
 })
 
-router.delete('/dltpromo/:id',(req,res )=>{
-  const{id}=req.params
-  req.getConnection((err,conn)=>{
-    if(err) return res.send(err)
-      conn.query(
-        `
+router.delete('/dltpromo/:id', (req, res) => {
+  const { id } = req.params
+  req.getConnection((err, conn) => {
+    if (err) return res.send(err)
+    conn.query(
+      `
         SELECT promo_pd_id  FROM promocion_producto WHERE promo_pd_prom_id = ?
         `
-        ,[id], (err, rows)=>{
-          if(err) return res.send(err)
-          conn.query(
-            'DELETE FROM promocion_producto WHERE promo_pd_id = ?',[rows[0].promo_pd_id],(err,resp)=>{
-                if(err) return res.send(err)
-      
-                conn.query(
-                  'DELETE FROM promocion WHERE prom_id = ?',[id],(err,resp)=>{
-                    if(err) return res.send(err)
-                    res.send('enviado')
-                  }
-                )
-            }
-          )
-        }
-      )
-   } 
+      , [id], (err, rows) => {
+        if (err) return res.send(err)
+        conn.query(
+          'DELETE FROM promocion_producto WHERE promo_pd_id = ?', [rows[0].promo_pd_id], (err, resp) => {
+            if (err) return res.send(err)
+
+            conn.query(
+              'DELETE FROM promocion WHERE prom_id = ?', [id], (err, resp) => {
+                if (err) return res.send(err)
+                res.send('enviado')
+              }
+            )
+          }
+        )
+      }
+    )
+  }
   )
 })
 
@@ -143,74 +143,74 @@ router.delete('/dltpromo/:id',(req,res )=>{
 
 
 // insertar una promocion 
-router.post('/insertar/promociones-admin', (req, res)=>{
-  const{name, code, dateIn, dateOut, desc,descripcion}=req.body;
-  let estado;
-  const  valestado = () => {
-      function addZero(x,n){
-          while (x.toString().length < n) {
-              x = "0" + x;
-          }
-          return x;
-      }
-      let date =  new Date();
-      let current = addZero(date.getFullYear(),2)+'-'+addZero((date.getMonth()+1),2)+'-'+addZero(date.getDate(),2);
-      return estado=current;
-  }
-  valestado();
-  console.log(estado)
+router.post('/add-promo', (req, res) => {
+  const { prod_menu, code, dateIn, dateOut, desc, descripcion, image_prom } = req.body;
+  console.log(req.body)
 
-  req.getConnection((err, conn)=>{
-      if(err) return res.send(err)
-      conn.query(
-      `
-        INSERT INTO promocion(prom_code_promo, prom_fecha_inicio ,
-        prom_fecha_fin , prom_descuento, 
-        prom_estado,prom_descripcion ) 
-        VALUES(?,?,?,?,?,?);
-      `
-      , [code,dateIn,dateOut,desc,estado,descripcion], (err, rows)=>{
-          if(err) return res.send(err)
-          return res.send('promocion added!')
+  req.getConnection((err, conn) => {
+    if (err){return res.send("No se pudo realizar la conexión al servidor")}
+
+    conn.query('START TRANSACTION;', (err, resp) => {
+      if (err) { return res.send("Ocurrio un error inesperado al agregar la promoción") };
+
+      conn.query(`INSERT INTO promocion(prom_code_promo, prom_fecha_inicio, prom_fecha_fin, prom_descuento, prom_descripcion, prom_image)
+        VALUES(?,?,?,?,?,?);`, [code, dateIn, dateOut, desc, descripcion, image_prom], (error, resp) => {
+        if (error) { conn.query('ROLLBACK;'); return res.send("Ocurrio un error inesperado al agregar la promoción") }
+
+        conn.query('SELECT prom_id AS id_promo FROM promocion WHERE prom_code_promo = ?', [code], (err, resp) => {
+          if (err) { conn.query('ROLLBACK;'); return res.send("Ocurrio un error inesperado al agregar la promoción") }
+
+          const idNewProm = resp[0].id_promo;
+
+          conn.query(`INSERT INTO promocion_producto(promo_pd_prod_menu_id, promo_pd_prom_id)
+            VALUES(?, ?)`, [prod_menu, prod_menu], (err, resp) => {
+            if (err) { conn.query('ROLLBACK;'); return res.send("Ocurrio un error inesperado al agregar la promoción") }
+
+            conn.query('COMMIT;');
+            return res.send("Promoción agregada satisfactoriamente.");
+
+          })
+        })
       })
+    })
   })
 })
 
 
 // eliminar promocion
-router.delete('/eliminarpromo/:id', (req, res)=>{
-  req.getConnection((err, conn)=>{
-      if(err) return res.send(err)
-      conn.query(
+router.delete('/eliminarpromo/:id', (req, res) => {
+  req.getConnection((err, conn) => {
+    if (err) return res.send(err)
+    conn.query(
       `
       DELETE FROM promocion WHERE prom_id = ?
       `
-      , [req.params.id], (err, rows)=>{
-          if(err) return res.send(err)
+      , [req.params.id], (err, rows) => {
+        if (err) return res.send(err)
 
-          res.send('Promocion Eliminada!')
+        res.send('Promocion Eliminada!')
       })
   })
 })
 
 
 // actualizar promocion
-router.put('/actualizar/promociones-admin/:id', (req, res)=>{
-  const{name, code, dateIn, dateOut, desc,descripcion,id}=req.body;
-  
+router.put('/actualizar/promociones-admin/:id', (req, res) => {
+  const { name, code, dateIn, dateOut, desc, descripcion, id } = req.body;
 
-  req.getConnection((err, conn)=>{
-      if(err) return res.send(err)
-      conn.query(
+
+  req.getConnection((err, conn) => {
+    if (err) return res.send(err)
+    conn.query(
       `
       UPDATE promocion SET prom_code_promo = ?, prom_fecha_inicio = ?, 
       prom_fecha_fin = ?, prom_descuento = ?,
       prom_descripcion = ? WHERE promocion.prom_id = ?;
       `
-      , [code,dateIn,dateOut,desc,descripcion,id], (err, rows)=>{
-          if(err) return res.send(err)
+      , [code, dateIn, dateOut, desc, descripcion, id], (err, rows) => {
+        if (err) return res.send(err)
 
-          res.send('promocion actualizada!')
+        res.send('promocion actualizada!')
       })
   })
 })
@@ -221,17 +221,17 @@ router.put('/actualizar/promociones-admin/:id', (req, res)=>{
 
 router.get('/productos', (req, res) => {
   req.getConnection((err, conn) => {
-      if (err) return res.send(err)
+    if (err) return res.send(err)
 
-      conn.query(
+    conn.query(
       `
       SELECT  prod_menu_id,prod_menu_nombre
       FROM  producto_menu;
       `, (err, rows) => {
-          if (err) return res.send(err)
+      if (err) return res.send(err)
 
-          res.json(rows)
-      })
+      res.json(rows)
+    })
   })
 })
 
