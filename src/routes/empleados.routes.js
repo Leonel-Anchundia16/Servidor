@@ -1,17 +1,16 @@
 const { Router } = require('express');
 const router = Router();
+const bscrypt = require('bcrypt');
 
 
-router.get('/empleado', (req, res) => {
+router.get('/get=typesemployed', (req, res) => {
     req.getConnection((err, conn) => {
         if (err) return res.send(err)
 
-        conn.query(`
-         SELECT empl_id,concat  (empl_nombre,' - ' ,empl_apellidos) AS 'nombres empleados', empl_tipo_empl_id, empl_email ,empl_fechanac ,empl_telefono
-         FROM empleado;
-        `, (err, rows) => {
-            if (err) return res.send(err)
-            res.json(rows)
+        conn.query(`SELECT tipo_empl_id as id, tipo_empl_nombre as name FROM tipo_empleado`, (err, rows) => {
+            if (err) {return res.send(err)};
+
+            return res.json(rows);
         })
     })
 })
@@ -38,38 +37,36 @@ router.get('/empleado/lista', (req, res) => {
 })
 
 // insertar un Empleado 
-router.post('/insertar/empleado', (req, res)=>{
-    const{name,namel,dat,tel,email,select,password}=req.body;
+router.post('/insertar/empleado', async (req, res)=>{
+    const { firstName, lastName, emailEmpl, typeEmpl, dateNacm, numberEmpl, password } = req.body;
+    const encripPass = await bscrypt.hash(password, 8);
+    
     req.getConnection((err, conn)=>{
-        if(err) return res.send(err)
-        conn.query(
-        `
-        INSERT INTO empleado(empl_nombre, empl_apellidos,
+        if(err){ return res.send(false); };
+
+        conn.query(`INSERT INTO empleado( empl_nombre, empl_apellidos,
         empl_telefono , empl_fechanac, empl_email,
         empl_tipo_empl_id, empl_password) 
         VALUES(?,?,?,?,?,?,?);
-        `
-        , [name,namel,tel,dat,email,select,password], (err, rows)=>{
-            if(err) return res.send(err)
-            return res.send('empleado agregado!')
+        `, [ firstName, lastName, numberEmpl, dateNacm, emailEmpl, typeEmpl, encripPass ], (err, rows)=>{
+            if(err){ return res.send(false) };
+
+            return res.send(true);
         })
     })
 })
 
 
 router.delete('/eliminaremp/:id', (req, res)=>{
-    const{id}=req.body;
+    const { id } =req.params;
+
     req.getConnection((err, conn)=>{
-        if(err) return res.send(err)
-        conn.query(
-        `
-        DELETE FROM empleado WHERE empl_id = ?
-        `
-        , [req.params.id]
-        , (err, rows)=>{
+        if(err) {return res.send(err)};
+
+        conn.query(`DELETE FROM empleado WHERE empl_id = ?`, [ id ], (err, rows)=>{
             if(err) return res.send(err)
   
-            res.send('Empleado Eliminado!')
+            return res.send(true);
         })
     })
 })

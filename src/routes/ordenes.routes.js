@@ -15,7 +15,7 @@ const dateTime = () => {
 }
 
 
-const addOrden = ( clienteData, products, precios, credentials ) => {
+const addOrden = ( clienteData, products, precios, credentials, estado ) => {
   const { id_cliente, direccion, textarea, } = clienteData;
   const { delivery, subtotales, total } = precios;
   const { connect, res, error } = credentials;
@@ -23,7 +23,7 @@ const addOrden = ( clienteData, products, precios, credentials ) => {
 
 
   connect.query(`INSERT INTO orden(orden_cliente_id, orden_fechahora, orden_estado_order, orden_direccion_ubic, orden_direc_inf_adicional, orden_subtotal, orden_price_transporte, orden_total_orden)
-        VALUES(?, ?, "Pendiente", ?, ?, ?, ?, ?)`, [id_cliente, dateCurrent, direccion, textarea, subtotales, delivery, total], (err, resp) => {
+        VALUES(?, ?, ?, ?, ?, ?, ?, ?)`, [id_cliente, dateCurrent, estado, direccion, textarea, subtotales, delivery, total], (err, resp) => {
     if (err) { connect.query('ROLLBACK;'); return res.json(error); }
 
 
@@ -80,10 +80,10 @@ router.post('/new=orden', (req, res) => {
           connect.query("SELECT * FROM cliente WHERE cliente_email = ?", [email], (err, response) => {
             if (err) { connect.query('ROLLBACK;'); return res.json(error); }
             
-            return addOrden(  {id_cliente: response[0].cliente_id, direccion, textarea}, products, precios, {connect , res}  );
+            return addOrden(  {id_cliente: response[0].cliente_id, direccion, textarea}, products, precios, {connect , res}, "Pendiente"  );
           });
 
-        } else { return addOrden(  {id_cliente: resp[0].cliente_id, direccion, textarea}, products, precios, {connect , res, error}  );}
+        } else { return addOrden(  {id_cliente: resp[0].cliente_id, direccion, textarea}, products, precios, {connect , res, error}, "Pendiente" ); }
 
       });
     })
@@ -166,6 +166,42 @@ router.put("/view/:id", (req, res) => {
         
         return res.json( {cliente: dataCliente, totales, productos: detalles} )
       })
+    })
+  })
+})
+
+
+router.post('/new=orden-local', (req, res) => {
+  const { products, precios, dataCliente } = req.body;
+  const { firstName, lastName, email,nui, telefono, direccion, textarea, status } = dataCliente;
+  const error = { state: false, send: "Ocurrió un error inesperado al realizar tu transacción, inténtalo de nuevo." };
+  
+  req.getConnection((err, connect) => {
+    if (err) { return res.json(error) }
+
+    connect.query('START TRANSACTION;', (err, resp) => {
+      if (err) { connect.query("ROLLBACK;"); return red.json(error) }
+
+      connect.query('SELECT cliente_id FROM cliente WHERE cliente_cedula = ?', [nui], (err, resp) => {
+        if (err) { return connect.query('ROLLBACK;') }
+
+        if (resp.length === 0) {
+
+          connect.query(`INSERT INTO cliente(cliente_nombre, cliente_apellido, cliente_telefono, cliente_cedula)
+          VALUES(?, ?, ?, ?)`, [firstName, lastName, telefono, nui], (err, resp) => {
+
+            if (err) { connect.query('ROLLBACK;'); return res.json(error); }
+          });
+
+          connect.query("SELECT * FROM cliente WHERE cliente_cedula = ?", [nui], (err, response) => {
+            if (err) { connect.query('ROLLBACK;'); return res.json(error); }
+            
+            return addOrden(  {id_cliente: response[0].cliente_id, direccion, textarea}, products, precios, {connect , res}, status  );
+          });
+
+        } else { return addOrden(  {id_cliente: resp[0].cliente_id, direccion, textarea}, products, precios, {connect , res, error}, status );}
+
+      });
     })
   })
 })
