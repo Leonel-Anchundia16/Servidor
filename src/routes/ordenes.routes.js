@@ -123,7 +123,10 @@ router.put("/view/:id", (req, res) => {
     if(err){throw err};
 
     connect.query(`SELECT
+      orden_id as numOrden,
+      orden_estado_order as estado,
       CONCAT(cliente_nombre,' ',cliente_apellido) as nombres,
+      cliente_cedula as cedula,
       cliente_email as correo,
       cliente_telefono as telefono,
       orden_direccion_ubic as direccion,
@@ -137,11 +140,14 @@ router.put("/view/:id", (req, res) => {
       if(err){throw err};
 
       const dataCliente = {
+        numOrden: resp[0].numOrden,
+        estado: resp[0].estado,
         nombres: resp[0].nombres,
+        cedula: resp[0].cedula,
         correo: resp[0].correo,
         telefono: resp[0].telefono, 
         direccion: resp[0].direccion,
-        descDirecc: resp[0].infor,
+        descDirecc: resp[0].infor
       };
 
       const totales = {
@@ -151,7 +157,8 @@ router.put("/view/:id", (req, res) => {
       }
 
       connect.query(`SELECT
-      prod_menu_nombre as producto,
+        det_orden_id as idDetalle,
+        prod_menu_nombre as producto,
         det_orden_infor_adic as adicion,
         det_orden_cantidad as cantidad,
         prod_menu_precio as precio,
@@ -171,6 +178,7 @@ router.put("/view/:id", (req, res) => {
 })
 
 
+//NUEVA ORDEN DESDE ADMINISTRACIÓN
 router.post('/new=orden-local', (req, res) => {
   const { products, precios, dataCliente } = req.body;
   const { firstName, lastName, email,nui, telefono, direccion, textarea, status } = dataCliente;
@@ -204,6 +212,80 @@ router.post('/new=orden-local', (req, res) => {
       });
     })
   })
+})
+
+
+//ELIMINAR UNA ORDEN
+router.delete('/dlt=order/:id', (req, res) => {
+  const { id } = req.params;
+
+  req.getConnection( (err, connect) => {
+    if(err){return res.status(500).send(err)};
+
+    connect.query(`START TRANSACTION;`, (err, resp) => {
+      if(err){ connect.query('ROLLBACK;'); return res.status(500).send(err); };
+      
+      connect.query(`SELECT det_orden_id FROM detalle_orden
+      INNER JOIN orden ON orden_id = det_orden_orden_id
+      WHERE orden.orden_id = ?`, [id], (err, resp) => {
+        if(err){ connect.query('ROLLBACK;'); return res.status(500).send(err)};
+        
+        resp.map(response => 
+          connect.query(`DELETE FROM detalle_orden WHERE det_orden_id = ?`, [ response.det_orden_id ], (err, resp) => {
+            if(err){ connect.query('ROLLBACK;'); return res.status(500).send(err)};
+          })  
+        )
+
+        connect.query('DELETE FROM orden WHERE orden_id = ?', [id], (err, resp) => {
+          if(err){ connect.query('ROLLBACK;'); return res.status(500).send(err)};
+
+          connect.query('COMMIT;');
+          return res.status(200).send("done");
+        })
+
+      })
+
+    })
+  })
+
+})
+
+
+//CAMBIAR ESTADO DE ORDEN YA CONFIRMADA
+router.put('/confirm/order/:id', (req, res) => {
+  const { id } = req.params;
+
+  req.getConnection( (err, connect) => {
+    if(err){return res.status(500).send(err)};
+    
+    connect.query(`UPDATE orden SET orden_estado_order = "Entregado" WHERE orden_id = ?`, [id], (err, resp) => {
+      if(err){return res.status(500).send(err)};
+      
+      return res.status(200).send(true);
+    })
+  } )
+
+})
+
+
+//EDITAR INFORMACION DE PRODUCTOS DE LA ORDEN 
+router.put('/update/order/list/:idOrder', (req, res) => {
+  const { idOrder } = req.params;
+
+  req.getConnection((err, connect) => {
+    if(err){return res.status(500).send(err)};
+
+    connect.query(`START TRANSACTION;`, (err, resp) => {
+      if(err){return res.status(500).send(err)};
+
+      req.body.map(obj => {
+        const { id, infAdic, priceAdic } = obj;
+
+        connect.query(`UPDATE detalle_orden SET det_orden_precio_total = ?, det_orden_infor_adic = ?  WHERE det_orden_id = ?`, [])
+      })
+    });
+  })
+
 })
 
 

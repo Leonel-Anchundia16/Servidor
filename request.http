@@ -1,4 +1,7 @@
 ###
+DELETE http://localhost:9000/api/ordenes/dlt=order/5 HTTP/1.1
+
+###
 PUT http://localhost:9000/api/promociones/query/update/11 HTTP/1.1
 Content-Type: application/json
  {
@@ -39,19 +42,8 @@ Content-Type: application/json
 }
 
 ###
-GET http://localhost:9000/api/empleados/get=typesemployed HTTP/1.1
+GET http://localhost:9000/api/menu HTTP/1.1
 
 ###
-PUT http://localhost:9000/api/empleados/actualizar/empleado-admin/3 HTTP/1.1
-Content-Type: application/json
+PUT http://localhost:9000/api/ordenes/confirm/order/1 HTTP/1.1
 
-{
-    "name": "Leonel",
-    "namel": "Anchundia",
-    "dat": "2000-08-16",
-    "tel": "0987654321",
-    "email": "leo@gmail.com",
-    "select": "2",
-    "id":"3"
-    
-}

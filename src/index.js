@@ -5,6 +5,7 @@ const conectionDB = require('./DBconect');
 const myconn = require('express-myconnection')
 const cors = require("cors");
 
+const path = require('path');
 const app = express()
 
 const routes = require('./routes');
@@ -22,6 +23,7 @@ const homeRoute=require('./routes/homeadmin.routes');
 app.use(myconn(mysql, conectionDB, 'single'))
 app.use(express.json());
 app.use(cors());
+app.use(express.static(path.join(__dirname, '../public')));
 
 
 // routes -------------------------------------------
