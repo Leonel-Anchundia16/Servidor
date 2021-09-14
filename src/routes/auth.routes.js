@@ -1,4 +1,4 @@
-const { Router, response } = require('express');
+const { Router } = require('express');
 const config = require('../config');
 const router = Router();
 const jsonWt = require('jsonwebtoken');
@@ -125,25 +125,20 @@ router.post('/verifUser', (req, res) => {
     try{
         decodedToken = jsonWt.verify( token, config.USER_SECRET);
     }catch(e){
-        response.status(401);
-        return res.send("Not authorized");
+        return res.status(401).send("Not authorized");
     }
     
     if(!token || !decodedToken.id){
-        return response.status(401).json({error: "No tienes Acceso a este pestaña"});
+        return res.status(401).json({error: "No tienes Acceso a este pestaña"});
     }else{
         req.getConnection( (err, conn ) => {
             conn.query('SELECT cliente_id FROM cliente WHERE cliente_id = ?', [decodedToken.id], ( err, resp ) => {
-                if(err){
-                    console.log("buenas buenas no encontre tu usuario")
-                    return res.send(err);
-                }
+                if(err){return res.status(401).send(err);}
+
                 if(resp.lenght === 0){
-                    response.status(401);
-                    return res.send(false)
+                    return res.status(200).send(false)
                 }else{
-                    response.status(200);
-                    return res.send(true);
+                    return res.status(200).send(true);
                 }
             })
         })
@@ -163,25 +158,22 @@ router.post('/verifAdmin', (req, res) => {
     try{
         decodedToken = jsonWt.verify(token, config.ADMIN_SECRET);
     }catch(err){
-        response.status(401);
-        return res.send("Not authorized");
+        return res.status(401).send("Not authorized");
     }
         
     if(!token || !decodedToken.id){
-        response.status(401)
-        return res.send({error: "No cuentas con los permisos necesarios para ejecutar esta pestaña"});
+        return res.status(401).send({error: "No cuentas con los permisos necesarios para ejecutar esta pestaña"});
     }else{
         req.getConnection( (err, conn ) => {
             conn.query('SELECT empl_id FROM empleado WHERE empl_id = ?', [decodedToken.id], ( err, resp ) => {
                 if(err){
-                    return res.send(console.error(err));
+                    return res.status(401).send(console.error(err));
                 }
+
                 if(resp.lenght === 0){
-                    response.status(200);
-                    return res.send(false)
+                    return res.status(200).send(false)
                 }else{
-                    response.status(200);
-                    return res.send(true);
+                    return res.status(200).send(true);
                 }
             })
         })

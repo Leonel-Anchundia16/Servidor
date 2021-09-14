@@ -2,20 +2,19 @@
 DELETE http://localhost:9000/api/ordenes/dlt=order/5 HTTP/1.1
 
 ###
-PUT http://localhost:9000/api/promociones/query/update/11 HTTP/1.1
+PUT http://localhost:9000/api/empleados/update/userWPttAdm/5 HTTP/1.1
 Content-Type: application/json
- {
-    "prod_menu_id": 5,
-    "prom_descuento": 25,
-    "prom_code_promo": "HOLAMUNDO021",
-    "prom_fecha_inicio": "2021-09-06T16:46:00.000Z",
-    "prom_fecha_fin": "2021-09-10T16:46:00.000Z",
-    "prom_descripcion": "sdsamdasdsadas das",
-    "prom_image": {
-      "type": "Buffer",
-      "data": []
-    }
-  }
+
+{
+  "typeEmpl": 1,
+  "firstName": "Andresito",
+  "lastName": "Moncayo Zambrano",
+  "numberEmpl": "0989732160",
+  "dateNacm": "2021-09-10",
+  "emailEmpl": "andres@moncayo.com",
+  "newpassword": "andres02"
+}
+
 ###
 POST http://localhost:9000/api/promociones/add-promo HTTP/1.1
 Content-Type: application/json
@@ -42,7 +41,7 @@ Content-Type: application/json
 }
 
 ###
-GET http://localhost:9000/api/menu HTTP/1.1
+GET http://localhost:9000/api/empleados/empl_inf_to_update/1 HTTP/1.1
 
 ###
 PUT http://localhost:9000/api/ordenes/confirm/order/1 HTTP/1.1

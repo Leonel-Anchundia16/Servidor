@@ -8,8 +8,8 @@ router.get('/lista', (req, res) => {
         conn.query(`SELECT 
         cliente_id, 
         cliente_cedula,
-        CONCAT(cliente_nombre,'  ',cliente_apellido) AS nombres,  
-        cliente_telefono, 
+        CONCAT(cliente_nombre,' ',cliente_apellido) AS nombres,  
+        CONCAT('0',cliente_telefono) AS cliente_telefono, 
         cliente_email
         FROM cliente`, (err, rows) => {
             if (err) return res.send(err)

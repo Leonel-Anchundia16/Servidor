@@ -15,9 +15,10 @@ const dateTime = () => {
 }
 
 
+//funcion para agregar una nueva orden
 const addOrden = ( clienteData, products, precios, credentials, estado ) => {
   const { id_cliente, direccion, textarea, } = clienteData;
-  const { delivery, subtotales, total } = precios;
+  const { delivery, subtotales, total, priceAdic = 0 } = precios;
   const { connect, res, error } = credentials;
   const dateCurrent = dateTime();  
 
@@ -39,14 +40,16 @@ const addOrden = ( clienteData, products, precios, credentials, estado ) => {
         const { id, price, quantity, inforAdd } = product;
 
         connect.query(`
-              INSERT INTO detalle_orden(det_orden_orden_id , det_orden_prod_menu_id, det_orden_precio_total, det_orden_cantidad, det_orden_infor_adic )
-              VALUES(?, ?, ?, ?, ?)`, [id_order, id, price * quantity, quantity, inforAdd], (err, res) => { err ? errorsCont = errorsCont + 1 : null })
+          INSERT INTO detalle_orden(det_orden_orden_id , det_orden_prod_menu_id, det_orden_precio_total, det_orden_cantidad, det_orden_infor_adic, det_orden_precio_adic )
+          VALUES(?, ?, ?, ?, ?, ?)`, [id_order, id, price * quantity, quantity, inforAdd, priceAdic], (err, res) => { err ? errorsCont = errorsCont + 1 : null })
       })
 
       if (errorsCont === 0) {
         connect.query('COMMIT;');
+        console.log("done")
         return res.json({ state: true, send: "Tu pedido se ha realizado correctamente.", statusText: 200 });
       }
+      console.log("err")
 
       connect.query('ROLLBACK;');
       return res.json(error);
@@ -55,9 +58,10 @@ const addOrden = ( clienteData, products, precios, credentials, estado ) => {
 }
 
 
+//ADD ORDEN DESDE UI DE USUARIO
 router.post('/new=orden', (req, res) => {
   const { products, precios, dataCliente } = req.body;
-  const { firstName, lastName, email, telefono, direccion, textarea } = dataCliente;
+  const { firstName, lastName, email, numNUI ,telefono, direccion, textarea } = dataCliente;
   const error = { state: false, send: "Ocurrió un error inesperado al realizar tu transacción, inténtalo de nuevo." };
   
   req.getConnection((err, connect) => {
@@ -71,8 +75,8 @@ router.post('/new=orden', (req, res) => {
 
         if (resp.length === 0) {
 
-          connect.query(`INSERT INTO cliente(cliente_nombre, cliente_apellido, cliente_telefono, cliente_email)
-          VALUES(?, ?, ?, ?)`, [firstName, lastName, telefono, email], (err, resp) => {
+          connect.query(`INSERT INTO cliente(cliente_nombre, cliente_apellido, cliente_telefono, cliente_email, cliente_cedula)
+          VALUES(?, ?, ?, ?,  ?)`, [firstName, lastName, telefono, email, numNUI], (err, resp) => {
 
             if (err) { connect.query('ROLLBACK;'); return res.json(error); }
           });
@@ -90,6 +94,10 @@ router.post('/new=orden', (req, res) => {
   })
 })
 
+
+// =========================================
+//             ADMINISTRACION
+// =========================================
 
 //VISTA ORDENES - lista de ordenes
 router.get('/getOrders', (req, res)=>{
@@ -162,6 +170,7 @@ router.put("/view/:id", (req, res) => {
         det_orden_infor_adic as adicion,
         det_orden_cantidad as cantidad,
         prod_menu_precio as precio,
+        det_orden_precio_adic as priceAdic,
         det_orden_precio_total as subtotal
       FROM detalle_orden
       INNER JOIN producto_menu ON prod_menu_id = det_orden_prod_menu_id
@@ -181,7 +190,9 @@ router.put("/view/:id", (req, res) => {
 //NUEVA ORDEN DESDE ADMINISTRACIÓN
 router.post('/new=orden-local', (req, res) => {
   const { products, precios, dataCliente } = req.body;
-  const { firstName, lastName, email,nui, telefono, direccion, textarea, status } = dataCliente;
+  const { firstName, lastName, email, nui, telefono, direccion, textarea, status } = dataCliente;
+  const { delivery, subtotales, total, priceAdic } = precios;
+
   const error = { state: false, send: "Ocurrió un error inesperado al realizar tu transacción, inténtalo de nuevo." };
   
   req.getConnection((err, connect) => {
@@ -207,7 +218,15 @@ router.post('/new=orden-local', (req, res) => {
             return addOrden(  {id_cliente: response[0].cliente_id, direccion, textarea}, products, precios, {connect , res}, status  );
           });
 
-        } else { return addOrden(  {id_cliente: resp[0].cliente_id, direccion, textarea}, products, precios, {connect , res, error}, status );}
+        } else { 
+          return addOrden(  
+            {id_cliente: resp[0].cliente_id, direccion, textarea}, 
+            products, 
+            { delivery, subtotales, total, priceAdic }, 
+            {connect , res, error}, 
+            status 
+          );
+        }
 
       });
     })
@@ -276,12 +295,30 @@ router.put('/update/order/list/:idOrder', (req, res) => {
     if(err){return res.status(500).send(err)};
 
     connect.query(`START TRANSACTION;`, (err, resp) => {
-      if(err){return res.status(500).send(err)};
+      if(err){ connect.query('ROLLBACK;'); return res.status(500).send(err) };
 
+      let subtotal_total = 0;
       req.body.map(obj => {
-        const { id, infAdic, priceAdic } = obj;
+        const { id, infAdic, priceAdic, subtotal } = obj;
+        const subtXprod = (subtotal + parseFloat(priceAdic)).toFixed(2);
+        subtotal_total = (parseFloat(subtotal_total) + parseFloat(subtXprod)).toFixed(2);
+        
+        connect.query(`UPDATE detalle_orden SET 
+          det_orden_precio_total = ?, 
+          det_orden_infor_adic = ?,
+          det_orden_precio_adic = ?
+        WHERE det_orden_id = ? AND det_orden_orden_id = ?`, 
+        [ subtXprod, infAdic, parseFloat(priceAdic), id, idOrder ], (err, res) => {
+          if(err){ connect.query('ROLLBACK;'); return res.status(500).send(err) };          
+        })
+        
+      })
+      
+      connect.query(`UPDATE orden SET orden_subtotal = ${subtotal_total}, orden_total_orden = ${subtotal_total} + (SELECT orden_price_transporte FROM orden WHERE orden_id = ${idOrder}) WHERE orden_id = ${idOrder}`, (err, resp) => {
+        if(err){ connect.query('ROLLBACK;'); return res.status(500).send(err) };
 
-        connect.query(`UPDATE detalle_orden SET det_orden_precio_total = ?, det_orden_infor_adic = ?  WHERE det_orden_id = ?`, [])
+        connect.query('COMMIT;');
+        return res.status(200).send(true);
       })
     });
   })
