@@ -41,8 +41,8 @@ Content-Type: application/json
 }
 
 ###
-GET http://localhost:9000/api/empleados/empl_inf_to_update/1 HTTP/1.1
+GET http://localhost:9000/api/home/orders=pend HTTP/1.1
 
 ###
-PUT http://localhost:9000/api/ordenes/confirm/order/1 HTTP/1.1
+PUT http://localhost:9000/api/menu HTTP/1.1
 

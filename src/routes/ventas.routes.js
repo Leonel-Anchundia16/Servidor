@@ -2,86 +2,90 @@ const { Router } = require('express');
 const router = Router();
 
 
-// precio total de estado entregado
-// router.get('/resumentabl/entregado', (req, res) => {
-//     req.getConnection((err, conn) => {
-//         if (err) return res.send(err)
+// CARDS VENTAS
+router.get('/details_resm_/sales', (req, res) => {
+    let responses = [];
 
-//         conn.query(
-//             `
-//             SELECT SUM(orden_total_orden)
-//     FROM orden
-//     WHERE (orden_estado_order='Entregado') 
-//     AND (YEAR(orden_fechahora) = YEAR(CURRENT_DATE()) AND MONTH(orden_fechahora) = MONTH(CURRENT_DATE()));
-//         `, (err, rows) => {
-//             if (err) return res.send(err)
+    req.getConnection((err, connect) => {
+        if(err){return res.status(500).send(err)};
 
-//             res.json(rows)
-//         })
-//     })
-// });
+        connect.query(`SELECT 
+            SUM( orden_total_orden ) as ingresos,
+            EXTRACT( MONTH from orden.orden_fechahora ) as mes
+        FROM orden
+        WHERE orden_estado_order='Entregado' OR orden_estado_order='Servido' 
+        AND YEAR(orden_fechahora) = YEAR(CURRENT_DATE())
+        AND MONTH(orden_fechahora) = MONTH(CURRENT_DATE())`, (err, resp) => {
+            if(err){return res.status(500).send(err)};
 
-// Produccto mas vendido
-router.get('/resumentabl/mas_vendido', (req, res) => {
-    req.getConnection((err, conn) => {
-        if (err) return res.send(err)
-
-        conn.query(
-            `
-            SELECT
-orden.orden_id,
-producto_menu.prod_menu_nombre as nombre,
-producto_menu.prod_menu_precio as precio,
-COUNT(detalle_orden.det_orden_cantidad) as cantidad
-from producto_menu
-INNER JOIN detalle_orden on detalle_orden.det_orden_prod_menu_id =producto_menu.prod_menu_id
-INNER JOIN orden on orden.orden_id = detalle_orden.det_orden_orden_id
-        `, (err, rows) => {
-            if (err) return res.send(err)
-
-            res.json(rows)
+            responses = [ ...responses, resp[0] ];
+            connect.query(`SELECT
+                prod_menu_nombre as nombre,
+                SUM( det_orden_cantidad ) as cantidad
+            from detalle_orden
+            INNER JOIN producto_menu ON prod_menu_id = det_orden_prod_menu_id
+            INNER JOIN orden ON orden_id = det_orden_orden_id
+            WHERE YEAR(orden_fechahora) = YEAR(CURRENT_DATE())
+                AND MONTH(orden_fechahora) = MONTH(CURRENT_DATE())
+            GROUP BY nombre ORDER BY det_orden_cantidad DESC
+            LIMIT 1`, (err, resp) => {
+                if(err){return res.status(500).send(err)};
+                
+                responses = [ ...responses, resp[0] ];
+                return res.send(responses);
+            })
         })
     })
-});
 
-//ingresos estimados
-router.get('/ingresosmes', (req, res) => {
-    req.getConnection((err, conn) => {
-        if (err) return res.send(err)
-        conn.query(`
-        SELECT 
-        EXTRACT(MONTH from orden.orden_fechahora) as mes,
-        SUM(orden.orden_total_orden) as ingresos
-        from orden
-         `, (err, rows) => {
-            if (err) return res.send(err)
+} )
 
-            res.json(rows)
-        })
-    })
-})
+
 // clientes con mayor compra
-
-router.get('/ventas/topcliente', (req, res) => {
+router.get('/customers_plus/sales', (req, res) => {
     req.getConnection((err, conn) => {
-        if (err) return res.send(err)
+        if (err) {return res.status(500).send(err)}
 
         conn.query(`
         SELECT
-        cliente_id,
-        concat  (cliente_nombre,' ' ,cliente_apellido) AS 'nombres',
-        cliente_telefono,
-        cliente_email ,
-        COUNT(orden_id) AS to_orden
+            CONCAT(cliente_nombre,' ' ,cliente_apellido) AS cliente,
+            cliente_telefono as tel,
+            cliente_email as email,
+            COUNT(orden_id) AS to_orden
         FROM cliente
         inner join orden on cliente_id= orden_cliente_id
         GROUP BY cliente_id
         ORDER BY to_orden DESC
-         `, (err, rows) => {
-            if (err) return res.send(err)
+        LIMIT 5`, (err, rows) => {
+            if (err) {return res.status(500).send(err)}
 
-            res.json(rows)
+            return res.status(200).json(rows)
         })
     })
 })
+
+
+//ranking de productos con mas pedidos
+router.get('/products_more_sales', (req, res) => {
+    req.getConnection((err, connect) => {
+        if(err){return res.status(500).send(err)};
+
+        connect.query(`SELECT
+            producto_menu.prod_menu_nombre as producto,
+            SUM(detalle_orden.det_orden_cantidad) AS cantidad,
+            SUM(producto_menu.prod_menu_precio * detalle_orden.det_orden_cantidad) AS ingresos
+        FROM detalle_orden
+        INNER JOIN producto_menu on producto_menu.prod_menu_id = detalle_orden.det_orden_prod_menu_id
+        INNER JOIN orden on orden.orden_id = detalle_orden.det_orden_orden_id
+        WHERE orden_estado_order='Entregado' OR orden_estado_order='Servido' 
+        AND YEAR(orden_fechahora) = YEAR(CURRENT_DATE())
+        AND MONTH(orden_fechahora) = MONTH(CURRENT_DATE())
+        GROUP BY producto ORDER BY Cantidad DESC LIMIT 10`, (err, resp) => {
+            if(err){return res.status(500).send(err)};
+
+            return res.status(200).json(resp);
+        })
+    })
+})
+
+
 module.exports = router;

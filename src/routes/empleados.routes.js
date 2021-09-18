@@ -41,6 +41,7 @@ router.post('/verf/NrGDIp2PH7FflhBY', (req, res) => {
 
 })
 
+
 //obtener los tipos de empleados
 router.get('/get=typesemployed', (req, res) => {
     req.getConnection((err, conn) => {
