@@ -1,5 +1,4 @@
 node_modules
 request.http
-data
-/public
+public
 src/private
