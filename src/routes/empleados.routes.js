@@ -59,20 +59,19 @@ router.get('/get=typesemployed', (req, res) => {
 //obtener lista de empleados
 router.get('/empleado/lista', (req, res) => {
     req.getConnection((err, conn) => {
-        if (err) return res.send(err)
+        if (err) {return res.status(500).send(err)}
 
-        conn.query(`
-        SELECT 
-        empleado.empl_id AS 'id',
-        empleado.empl_nombre AS 'nombre',
-        empleado.empl_apellidos AS 'apellido',
-        empleado.empl_email AS 'correo',
-        empleado.empl_telefono AS 'telefono',
-        empleado.empl_fechanac AS 'fnacimiento'
-        FROM empleado;
-        `, (err, rows) => {
-            if (err) return res.send(err)
-            res.json(rows)
+        conn.query(`SELECT 
+        empl_id AS 'id',
+        CONCAT(empl_nombre, ' ', empl_apellidos) AS 'nombres',
+        empl_email AS 'correo',
+        empl_telefono AS 'telefono',
+        empl_fechanac AS 'dateNacm'
+        FROM empleado
+        ORDER BY id DESC`, (err, rows) => {
+            if (err) {return res.status(500).send(err)};
+
+            return res.status(200).json(rows);
         })
     })
 })

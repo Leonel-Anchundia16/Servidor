@@ -72,7 +72,7 @@ router.get('/products_more_sales', (req, res) => {
         connect.query(`SELECT
             producto_menu.prod_menu_nombre as producto,
             SUM(detalle_orden.det_orden_cantidad) AS cantidad,
-            SUM(producto_menu.prod_menu_precio * detalle_orden.det_orden_cantidad) AS ingresos
+            SUM(det_orden_precio_total) AS ingresos
         FROM detalle_orden
         INNER JOIN producto_menu on producto_menu.prod_menu_id = detalle_orden.det_orden_prod_menu_id
         INNER JOIN orden on orden.orden_id = detalle_orden.det_orden_orden_id
@@ -83,6 +83,15 @@ router.get('/products_more_sales', (req, res) => {
             if(err){return res.status(500).send(err)};
 
             return res.status(200).json(resp);
+        })
+    })
+})
+
+
+router.get('/fecha', (req,res ) => {
+    req.getConnection((err, con) => {
+        con.query('SELECT orden_fechahora FROM `orden` WHERE orden_id =  1', (err, resp) => {
+            return res.send(Date("locale"));
         })
     })
 })

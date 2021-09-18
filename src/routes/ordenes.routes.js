@@ -70,7 +70,7 @@ router.post('/new=orden', (req, res) => {
     connect.query('START TRANSACTION;', (err, resp) => {
       if (err) { connect.query("ROLLBACK;"); return red.json(error) }
 
-      connect.query('SELECT cliente_id FROM cliente WHERE cliente_email = ?', [email], (err, resp) => {
+      connect.query('SELECT cliente_id FROM cliente WHERE cliente_email = ? OR cliente_cedula = ?', [email, numNUI], (err, resp) => {
         if (err) { return connect.query('ROLLBACK;') }
 
         if (resp.length === 0) {
