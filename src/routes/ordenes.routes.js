@@ -158,9 +158,17 @@ router.put("/view/:id", (req, res) => {
         descDirecc: resp[0].infor
       };
 
+      const descuento = () => {
+        if(parseFloat(resp[0].subtotales) + parseFloat(resp[0].transporte) === parseFloat(resp[0].total)){
+          return 0;
+        }
+        return ( ( parseFloat(resp[0].subtotales) + parseFloat(resp[0].transporte) ) - parseFloat(resp[0].total) ).toFixed(2);
+      }
+
       const totales = {
         subtotales: resp[0].subtotales,
         transporte: resp[0].transporte,
+        descuento: descuento(),
         totales: resp[0].total
       }
 
@@ -290,6 +298,7 @@ router.put('/confirm/order/:id', (req, res) => {
 //EDITAR INFORMACION DE PRODUCTOS DE LA ORDEN 
 router.put('/update/order/list/:idOrder', (req, res) => {
   const { idOrder } = req.params;
+  const { products, totales } = req.body;
 
   req.getConnection((err, connect) => {
     if(err){return res.status(500).send(err)};
@@ -298,7 +307,7 @@ router.put('/update/order/list/:idOrder', (req, res) => {
       if(err){ connect.query('ROLLBACK;'); return res.status(500).send(err) };
 
       let subtotal_total = 0;
-      req.body.map(obj => {
+      products.map(obj=> {
         const { id, infAdic, priceAdic, subtotal } = obj;
         const subtXprod = (subtotal + parseFloat(priceAdic)).toFixed(2);
         subtotal_total = (parseFloat(subtotal_total) + parseFloat(subtXprod)).toFixed(2);
@@ -309,12 +318,16 @@ router.put('/update/order/list/:idOrder', (req, res) => {
           det_orden_precio_adic = ?
         WHERE det_orden_id = ? AND det_orden_orden_id = ?`, 
         [ subtXprod, infAdic, parseFloat(priceAdic), id, idOrder ], (err, res) => {
-          if(err){ connect.query('ROLLBACK;'); return res.status(500).send(err) };          
+          if(err){ connect.query('ROLLBACK;'); return res.status(500).send(err) };  
         })
         
       })
       
-      connect.query(`UPDATE orden SET orden_subtotal = ${subtotal_total}, orden_total_orden = ${subtotal_total} + (SELECT orden_price_transporte FROM orden WHERE orden_id = ${idOrder}) WHERE orden_id = ${idOrder}`, (err, resp) => {
+      const totalOrden = parseFloat(subtotal_total) + parseFloat(totales.transporte) - parseFloat(totales.descuento);
+
+      connect.query(`UPDATE 
+      orden SET orden_subtotal = ${subtotal_total}, orden_total_orden = ${totalOrden} 
+      WHERE orden_id = ${idOrder}`, (err, resp) => {
         if(err){ connect.query('ROLLBACK;'); return res.status(500).send(err) };
 
         connect.query('COMMIT;');

@@ -88,13 +88,5 @@ router.get('/products_more_sales', (req, res) => {
 })
 
 
-router.get('/fecha', (req,res ) => {
-    req.getConnection((err, con) => {
-        con.query('SELECT orden_fechahora FROM `orden` WHERE orden_id =  1', (err, resp) => {
-            return res.send(Date("locale"));
-        })
-    })
-})
-
 
 module.exports = router;
